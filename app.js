@@ -18,13 +18,13 @@
 */
 
 const firebaseConfig = {
-  apiKey:            "REEMPLAZA_CON_TU_API_KEY",
-  authDomain:        "REEMPLAZA_CON_TU_AUTH_DOMAIN",
-  databaseURL:       "REEMPLAZA_CON_TU_DATABASE_URL",
-  projectId:         "REEMPLAZA_CON_TU_PROJECT_ID",
-  storageBucket:     "REEMPLAZA_CON_TU_STORAGE_BUCKET",
-  messagingSenderId: "REEMPLAZA_CON_TU_MESSAGING_SENDER_ID",
-  appId:             "REEMPLAZA_CON_TU_APP_ID"
+  apiKey:            "AIzaSyDbrBrDwP_WLGTiAd86Mdm4RuBrXHUW4wQ",
+  authDomain:        "chat-privado-298e4.firebaseapp.com",
+  databaseURL:       "https://chat-privado-298e4-default-rtdb.firebaseio.com/",
+  projectId:         "chat-privado-298e4",
+  storageBucket:     "chat-privado-298e4.firebasestorage.app",
+  messagingSenderId: "219822400254",
+  appId:             "1:219822400254:web:59eb817e601abba2053baf"
 };
 
 /* ─── STUN servers (servidores ICE públicos) ─── */
