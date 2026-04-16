@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NexusChat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════ -->
+<div id="auth-screen" class="screen active">
+  <div class="auth-bg"></div>
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">⬡</div>
+      <span>NexusChat</span>
+    </div>
+
+    <!-- Login -->
+    <div id="login-panel" class="auth-panel active">
+      <h2>Bienvenido de vuelta</h2>
+      <p class="auth-sub">Inicia sesión para continuar</p>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div id="login-error" class="auth-error hidden"></div>
+      <button id="login-btn" class="btn-primary">Iniciar sesión</button>
+      <p class="auth-switch">¿No tienes cuenta? <a href="#" id="go-register">Regístrate</a></p>
+    </div>
+
+    <!-- Register -->
+    <div id="register-panel" class="auth-panel">
+      <h2>Crear cuenta</h2>
+      <p class="auth-sub">Únete a NexusChat</p>
+      <div class="form-group">
+        <label>Nickname</label>
+        <input type="text" id="reg-nick" placeholder="TuNick" maxlength="20" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tu@correo.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      </div>
+      <div id="reg-error" class="auth-error hidden"></div>
+      <button id="register-btn" class="btn-primary">Crear cuenta</button>
+      <p class="auth-switch">¿Ya tienes cuenta? <a href="#" id="go-login">Inicia sesión</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════ -->
+<div id="app-screen" class="screen">
+
+  <!-- LEFT SIDEBAR: servers/rooms list -->
+  <div class="sidebar-left" id="sidebar-left">
+    <div class="sl-top">
+      <button class="sl-btn active" id="sl-home-btn" title="Inicio" onclick="showView('rooms')">⬡</button>
+      <div class="sl-divider"></div>
+      <div id="sl-rooms-list"></div>
+      <button class="sl-btn sl-add" id="sl-add-btn" title="Crear sala" onclick="openCreateRoom()">+</button>
+    </div>
+    <div class="sl-bottom">
+      <button class="sl-btn sl-avatar-btn" id="sl-profile-btn" title="Mi perfil" onclick="openProfile()">
+        <span id="sl-avatar-text"></span>
+        <img id="sl-avatar-img" src="" alt="" style="display:none">
+      </button>
+    </div>
+  </div>
+
+  <!-- CHANNEL SIDEBAR -->
+  <div class="sidebar-channel" id="sidebar-channel">
+    <div class="sc-header">
+      <div class="sc-room-name" id="sc-room-name">—</div>
+      <button class="sc-settings-btn" id="sc-settings-btn" title="Configurar sala" onclick="openRoomSettings()">⚙</button>
+    </div>
+    <div class="sc-section-label">CANALES DE TEXTO</div>
+    <div class="sc-channels" id="sc-channels">
+      <div class="sc-channel active" data-channel="general">
+        <span class="sc-hash">#</span> general
+      </div>
+    </div>
+    <div class="sc-section-label" style="margin-top:1rem">MIEMBROS</div>
+    <div class="sc-members" id="sc-members"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content" id="main-content">
+
+    <!-- HOME VIEW -->
+    <div id="view-home" class="view active">
+      <div class="home-container">
+        <div class="home-logo">⬡</div>
+        <h2>NexusChat</h2>
+        <p>Selecciona una sala para empezar a chatear,<br>o crea una nueva.</p>
+        <button class="btn-primary" onclick="openCreateRoom()">+ Crear sala</button>
+      </div>
+    </div>
+
+    <!-- CHAT VIEW -->
+    <div id="view-chat" class="view">
+      <!-- Chat header -->
+      <div class="chat-header">
+        <div class="chat-header-left">
+          <button class="mob-sidebar-btn" onclick="toggleMobileSidebar()"">☰</button>
+          <span class="ch-hash">#</span>
+          <span class="ch-name" id="ch-name">general</span>
+        </div>
+        <div class="chat-header-right">
+          <div class="peer-status-wrap">
+            <div class="online-dot" id="online-dot"></div>
+            <span class="online-label" id="online-label"></span>
+          </div>
+          <button class="hdr-btn" id="call-btn" title="Llamada de voz" onclick="startCall()" disabled>📞</button>
+          <button class="hdr-btn" id="members-toggle-btn" title="Miembros" onclick="toggleMembersPanel()">👥</button>
+        </div>
+      </div>
+
+      <!-- Call panel -->
+      <div id="call-panel" class="call-panel hidden">
+        <div class="call-inner">
+          <div class="call-users">
+            <div class="call-user-card">
+              <div class="call-av" id="call-av-local"></div>
+              <div class="call-uname" id="call-name-local"></div>
+              <span class="call-badge">Tú</span>
+            </div>
+            <div class="call-mid">
+              <div class="call-wave" id="call-wave">〜</div>
+              <div class="call-status-txt" id="call-status-txt">Llamando...</div>
+            </div>
+            <div class="call-user-card">
+              <div class="call-av" id="call-av-remote"></div>
+              <div class="call-uname" id="call-name-remote"></div>
+            </div>
+          </div>
+          <div class="screen-share-area hidden" id="screen-area">
+            <video id="remote-screen-video" autoplay playsinline></video>
+            <video id="local-screen-preview" autoplay playsinline muted></video>
+          </div>
+          <div class="call-controls">
+            <button class="call-ctrl-btn" id="mute-btn" onclick="toggleMute()" title="Silenciar">🎤</button>
+            <button class="call-ctrl-btn end" id="end-call-btn" onclick="endCall()" title="Colgar">📵</button>
+            <button class="call-ctrl-btn" id="share-btn" onclick="toggleScreenShare()" title="Pantalla">🖥️</button>
+          </div>
+        </div>
+        <!-- Incoming overlay -->
+        <div id="incoming-overlay" class="incoming-overlay hidden">
+          <div class="incoming-box">
+            <div class="incoming-av" id="incoming-av"></div>
+            <div class="incoming-name" id="incoming-name-txt"></div>
+            <div class="incoming-lbl">Llamada entrante</div>
+            <div class="incoming-btns">
+              <button class="btn-accept" onclick="acceptCall()">✅ Aceptar</button>
+              <button class="btn-reject" onclick="rejectCall()">❌ Rechazar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-area" id="messages-area">
+        <div class="messages-list" id="messages-list">
+          <div class="chan-welcome" id="chan-welcome">
+            <div class="cw-icon">#</div>
+            <h3 id="cw-name"></h3>
+            <p>Este es el comienzo del canal. ¡Di hola!</p>
+          </div>
+        </div>
+        <div class="typing-bar" id="typing-bar"></div>
+      </div>
+
+      <!-- Input bar -->
+      <div class="input-bar">
+        <label class="attach-btn" title="Adjuntar archivo">
+          📎
+          <input type="file" id="file-input" accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip" style="display:none">
+        </label>
+        <input type="text" id="msg-input" placeholder="Escribe un mensaje..." autocomplete="off" disabled>
+        <button id="send-btn" onclick="sendMessage()" disabled>➤</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MEMBERS PANEL (right) -->
+  <div class="members-panel hidden" id="members-panel">
+    <div class="mp-header">Miembros</div>
+    <div id="mp-list"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     MODALS
+══════════════════════════════════════ -->
+
+<!-- Create room modal -->
+<div class="modal-overlay hidden" id="modal-create-room">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Crear sala</h3>
+      <button class="modal-close" onclick="closeModal('modal-create-room')">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Nombre de la sala</label>
+      <input type="text" id="room-name-input" placeholder="mi-sala" maxlength="30">
+    </div>
+    <div class="form-group">
+      <label>Descripción (opcional)</label>
+      <input type="text" id="room-desc-input" placeholder="De qué trata esta sala...">
+    </div>
+    <div class="form-group">
+      <label>Tipo</label>
+      <select id="room-type-select">
+        <option value="private">🔒 Privada (solo invitados)</option>
+        <option value="public">🌐 Pública (cualquiera puede unirse)</option>
+      </select>
+    </div>
+    <div class="form-group" id="invite-members-wrap">
+      <label>Invitar miembros</label>
+      <div class="user-search-wrap">
+        <input type="text" id="invite-search" placeholder="Buscar usuarios...">
+      </div>
+      <div id="invite-results" class="invite-results"></div>
+      <div id="invited-chips" class="invited-chips"></div>
+    </div>
+    <button class="btn-primary" onclick="createRoom()">Crear sala</button>
+  </div>
+</div>
+
+<!-- Room settings modal -->
+<div class="modal-overlay hidden" id="modal-room-settings">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Configuración de sala</h3>
+      <button class="modal-close" onclick="closeModal('modal-room-settings')">✕</button>
+    </div>
+    <div class="rs-tabs">
+      <button class="rs-tab active" onclick="switchRsTab('general')">General</button>
+      <button class="rs-tab" onclick="switchRsTab('members')">Miembros</button>
+    </div>
+    <div id="rs-tab-general" class="rs-tab-content active">
+      <div class="form-group">
+        <label>Nombre</label>
+        <input type="text" id="rs-name-input">
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <input type="text" id="rs-desc-input">
+      </div>
+      <button class="btn-primary" onclick="saveRoomSettings()">Guardar cambios</button>
+      <hr class="modal-divider">
+      <button class="btn-danger" onclick="deleteRoom()">Eliminar sala</button>
+    </div>
+    <div id="rs-tab-members" class="rs-tab-content">
+      <div class="user-search-wrap">
+        <input type="text" id="rs-invite-search" placeholder="Invitar usuario...">
+      </div>
+      <div id="rs-invite-results" class="invite-results"></div>
+      <div class="form-group" style="margin-top:1rem">
+        <label>Miembros actuales</label>
+        <div id="rs-members-list" class="rs-members-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile modal -->
+<div class="modal-overlay hidden" id="modal-profile">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Mi perfil</h3>
+      <button class="modal-close" onclick="closeModal('modal-profile')">✕</button>
+    </div>
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar-preview" id="prof-av-preview"></div>
+      <label class="profile-av-change">
+        Cambiar foto
+        <input type="file" id="prof-avatar-file" accept="image/*" style="display:none">
+      </label>
+    </div>
+    <div class="form-group">
+      <label>Nickname</label>
+      <input type="text" id="prof-nick-input" maxlength="20">
+    </div>
+    <div class="form-group">
+      <label>Estado</label>
+      <select id="prof-status-select">
+        <option value="online">🟢 En línea</option>
+        <option value="away">🟡 Ausente</option>
+        <option value="busy">🔴 No molestar</option>
+      </select>
+    </div>
+    <div id="prof-error" class="auth-error hidden"></div>
+    <button class="btn-primary" onclick="saveProfile()">Guardar perfil</button>
+    <hr class="modal-divider">
+    <button class="btn-danger" onclick="signOut()">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- Message context menu -->
+<div class="ctx-menu hidden" id="ctx-menu">
+  <button onclick="ctxEdit()">✏️ Editar</button>
+  <button onclick="ctxDelete()">🗑️ Eliminar</button>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+<!-- Audio -->
+<audio id="remote-audio" autoplay></audio>
+<audio id="notif-audio" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAA..." preload="auto"></audio>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
